@@ -1,124 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './assessmentsstart.css';
 import logoela from '../asset/brand-footer.png';
-// import questionData from './Questionsdata.json';
-import { FaCheckCircle } from 'react-icons/fa';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import Dropdown from 'react-bootstrap/Dropdown';
-import { confirmAlert } from 'react-confirm-alert'; // Import
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
-
-//react-router
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-
-const Assessmentsstart = () => {
-
-  const navigate = useNavigate();
-
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState({});
-  const [score, setScore] = useState({});
-  const [timeLeft, setTimeLeft] = useState(3600); // 23 minutes and 46 seconds
-  const [selectedUserDropdown, setSelectedUserDropdown] = useState(1);
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [bookmarkedQuestions, setBookmarkedQuestions] = useState({});
-  var questionData = JSON.parse(localStorage.getItem("questionData"))
-  const [finalScore, setFinalScore] = useState(0);
-
-
-  useEffect(() => {
-    setTimeLeft(localStorage.getItem("TimeLeft"))
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(()=>{
-    if(timeLeft<=0){
-      localStorage.setItem("elacomplete", "true")
-      testcomplete();
-    }
-  })
-
-  const handleBookmark = () => {
-    // setBookmarkedQuestions((prev) =>
-    //   prev.includes(currentQuestionIndex)
-    //     ? prev.filter((index) => index !== currentQuestionIndex)
-    //     : [...prev, currentQuestionIndex]
-    // );
-    setBookmarkedQuestions({
-      ...bookmarkedQuestions,
-      [`${currentSectionIndex}-${currentQuestionIndex}`]:bookmarkedQuestions[`${currentSectionIndex}-${currentQuestionIndex}`]==="true" ? 'false' : 'true',
-    });
-  };
-
-  const handleNavigation = (direction) => {
-    const currentSection = questionData.sections[currentSectionIndex];
-    const currentSectionQuestions = currentSection.questions.slice(0, 20);
-
-    if (direction === 'next' && currentQuestionIndex < currentSectionQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else if (direction === 'previous' && currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
-  };
-
-  const handleOptionChange = (event) => {
-    setSelectedOptions({
-      ...selectedOptions,
-      [`${currentSectionIndex}-${currentQuestionIndex}`]: event.target.value,
-    });
-    setScore({
-      ...score,
-      [`${currentSectionIndex}-${currentQuestionIndex}`]: currentQuestion.answer===event.target.value?1:0,
-    });
-  };
-
-  const handleSelectChange = (event) => {
-    const selectedSectionIndex = parseInt(event.target.value) - 1;
-    setSelectedUserDropdown(event.target.value);
-    setCurrentSectionIndex(selectedSectionIndex);
-    setCurrentQuestionIndex(0);
-  };
-
-  // const handleFinishClick = () => {
-  //   setTimeout(() => {
-  //       navigate("/finish-assessment");
-  //   }, 2000);
-  // };
-
-  const handleNextSection = () => {
-    if (currentSectionIndex < questionData.sections.length - 1) {
-      setCurrentSectionIndex(currentSectionIndex + 1);
-      setCurrentQuestionIndex(0);
-    }
-  };
-
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    var timercolor = {}
-    if(seconds<=30){
-      timercolor = {color:'red'}
-    }
-    return (
-      <div className="time-row">
-        <div className="time-item">
-          <p style={timercolor} className='para-one'>{hours.toString().padStart(2, '0')}</p>
-          <p className='para-two'>Hours</p>
-        </div>
-        <div className="time-item">
-          <p style={timercolor} className='para-one'>{minutes.toString().padStart(2, '0')}</p>
-          <p className='para-two'>Minutes</p>
-        </div>
-        <div className="time-item">
-import React, { useState, useEffect } from 'react';
-import './assessmentsstart.css';
-import logoela from '../asset/brand-footer.png';
 import { FaCheckCircle } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -142,7 +24,7 @@ const Assessmentsstart = () => {
   const [totalQuestions, setTotalQuestions] = useState(0);
 
   useEffect(() => {
-    axios.get('https://csuite-productionup.railway.app/api/question')
+    axios.get('https://csuite-production.up.railway.app/api/question')
       .then(response => {
         setQuestionData(response.data);
         setTotalQuestions(response.data.sections.reduce((total, section) => total + section.questions.length, 0));
@@ -153,7 +35,8 @@ const Assessmentsstart = () => {
   }, []);
 
   useEffect(() => {
-    setTimeLeft(localStorage.getItem("TimeLeft"));
+    const storedTimeLeft = localStorage.getItem("TimeLeft");
+    if (storedTimeLeft) setTimeLeft(storedTimeLeft);
     const timer = setInterval(() => {
       setTimeLeft(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
@@ -247,9 +130,6 @@ const Assessmentsstart = () => {
     }
   };
 
-  const isCurrentSectionCompleted = questionData && questionData.sections[currentSectionIndex].questions
-    .every((_, index) => selectedOptions.hasOwnProperty(`${currentSectionIndex}-${index}`));
-
   const finishtest = () => {
     const notAnsweredCount = totalQuestions - Object.keys(selectedOptions).length;
     if (notAnsweredCount > 0) {
@@ -300,21 +180,13 @@ const Assessmentsstart = () => {
 
   if (!questionData) {
     return <div>Loading...</div>;
-      }
+  }
 
   const sections = questionData.sections;
   const currentSection = sections[currentSectionIndex];
   const currentSectionQuestions = currentSection.questions.slice(0, 20);
   const currentQuestion = currentSectionQuestions[currentQuestionIndex];
 
-  let [totalQuestions, settotalQuestions] = useState(0);
-  useEffect(()=>{
-    var total = 0;
-    for(var index in sections){
-      total += sections[index].questions.length;
-    }
-    settotalQuestions(total)
-  },[sections])
   const answeredCount = Object.keys(selectedOptions).length;
   const bookmarkedCount = Object.keys(bookmarkedQuestions).length;
   const notAnsweredCount = totalQuestions - answeredCount;
@@ -323,8 +195,7 @@ const Assessmentsstart = () => {
     selectedOptions.hasOwnProperty(`${currentSectionIndex}-${index}`)
   );
 
-
-  function logout(){
+  const logout = () => {
     confirmAlert({
       title: 'You are about to Logout',
       message: 'This will lead to loss of test progress, Do you wish to continue?',
@@ -332,13 +203,13 @@ const Assessmentsstart = () => {
         {
           label: 'Yes',
           onClick: () => {
-            localStorage.removeItem("isloggedin")
-            localStorage.removeItem("linkedin")
-            localStorage.removeItem("elacomplete")
-            localStorage.removeItem("userid")
-            localStorage.removeItem("email")
-            localStorage.removeItem("name")
-            navigate("../")
+            localStorage.removeItem("isloggedin");
+            localStorage.removeItem("linkedin");
+            localStorage.removeItem("elacomplete");
+            localStorage.removeItem("userid");
+            localStorage.removeItem("email");
+            localStorage.removeItem("name");
+            navigate("../");
           }
         },
         {
@@ -348,8 +219,6 @@ const Assessmentsstart = () => {
       ]
     });
   };
-
-  function finishtest(){
 
     if(notAnsweredCount>0){
       confirmAlert({
