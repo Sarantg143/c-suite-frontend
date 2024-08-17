@@ -220,53 +220,6 @@ const Assessmentsstart = () => {
     });
   };
 
-    if(notAnsweredCount>0){
-      confirmAlert({
-        title: 'You have '+notAnsweredCount+' unanswered questions',
-        message: 'Do you wish to continue?',
-        buttons: [
-          {
-            label: 'Yes',
-            onClick: () => {
-              localStorage.setItem("elacomplete", "true")
-              testcomplete();
-            }
-          },
-          {
-            label: 'No',
-            onClick: () => console.log('Click No')
-          }
-        ]
-      });
-    }
-    else{
-    confirmAlert({
-      title: 'You have '+formatTimevalue(timeLeft)+' time left',
-      message: 'Make sure that your answer are correct. Do you wish to continue?',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: () => testcomplete()
-        },
-        {
-          label: 'No',
-          onClick: () => console.log('Click No')
-        }
-      ]
-    });
-  }
-  };
-
-  function testcomplete(){
-    let sum = 0;
-    for (let i = 0; i < Object.values(score).length; i++) {
-      sum += Object.values(score)[i];
-    }
-    setFinalScore(sum);
-    localStorage.setItem("finalScore", sum);
-    navigate("/finish-assessment")
-  }
-
   return (
     <div className='assessment-head'>
       <div className='assessment-inside'>
@@ -281,112 +234,97 @@ const Assessmentsstart = () => {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                {/* <Dropdown.Item>Profile</Dropdown.Item> */}
-                <Dropdown.Item onClick={(e)=>{
-              e.preventDefault();
-              logout();
-              }}>Log Out</Dropdown.Item>
+                <Dropdown.Item onClick={(e) => {
+                  e.preventDefault();
+                  logout();
+                }}>Log Out</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </>
-          <button className='button-finish' onClick={(e=>{
+          <button className='button-finish' onClick={(e) => {
             e.preventDefault();
-            finishtest()
-          })}>Finish</button>
+            finishtest();
+          }}>Finish Test</button>
         </div>
-
-        <div className='container-fluid'>
-          <div className='row'>
-            <div className='w-75 h-100 left-side'>
-              <main className="quiz-main">
-                <div className='first-content'>
-                  <p className='count-question'>
-                    {(currentQuestionIndex + 1).toString().padStart(2, '0')}
-                    <span>/</span>
-                    {currentSectionQuestions.length}
-                  </p>
-                  <select className='change-selection' value={selectedUserDropdown} onChange={handleSelectChange}> {/* Use selectedUserDropdown state here */}
-                    {sections.map((section, index) => (
-                      <option key={index} value={index + 1}>{`Section - ${index + 1}`}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <p className='question-style'>{currentQuestion.question}</p>
-
-                <form>
-                  {currentQuestion.options.map((option, index) => (
-                    <div className="button-style-icons" key={index}>
-                      <label>
-                        <input
-                          type="radio"
-                          value={option}
-                          checked={selectedOptions[`${currentSectionIndex}-${currentQuestionIndex}`] === option}
-                          onChange={handleOptionChange}
-                        />
-                        <FaCheckCircle className="icon-style" size='1.8rem' />
-                        {` ${String.fromCharCode(65 + index)}. ${option}`}
-                      </label>
-                    </div>
-                  ))}
-                </form>
-
-                <div className="navigation-button">
-                  <button className='button-previous' onClick={() => handleNavigation('previous')} disabled={currentQuestionIndex === 0}>
-                    Previous
-                  </button>
-                  <button className='button-next' onClick={() => handleNavigation('next')} disabled={currentQuestionIndex === currentSectionQuestions.length - 1}>
-                    Next
-                  </button>
-                  <button className='button-bookmark' onClick={handleBookmark}>{`${bookmarkedQuestions[`${currentSectionIndex}-${currentQuestionIndex}`]==="true"? 'Bookmarked' : 'Bookmark'}`}</button>
-                </div>
-
-                {isCurrentSectionCompleted && currentSectionIndex < sections.length - 1 && (
-                  <div className="next-section-button">
-                    <button className='button-next-section' onClick={handleNextSection}>Next Section</button>
-                  </div>
-                )}
-              </main>
-            </div>
-            <div className='w-25 h-100 right-side'>
-              <div className='w-100 right-side-component'>
-                <div className="timer">
+        <div className='row-two'>
+          <div className='row-two-inside'>
+            <div className='first-inside'>
+              <div className="time-container">
+                <div className="time-content">
                   {formatTime(timeLeft)}
                 </div>
-                <div className='questions-container' style={{display:"flex", flexDirection:"column",gap:"5px", width:"100%"}}>
-                <div className="questions">
-                  <p>Questions</p>
-                </div>
-                <select className='change-selection-two' value={selectedUserDropdown} onChange={handleSelectChange}>
+              </div>
+            </div>
+            <div className='second-inside'>
+              <div className="dropdown-content">
+                <select className='dropdown-one' value={selectedUserDropdown} onChange={handleSelectChange}>
                   {sections.map((section, index) => (
-                    <option key={index} value={index + 1}>{`Section ${index + 1}`}</option>
+                    <option key={index} value={index + 1}>
+                      Section {index + 1}
+                    </option>
                   ))}
                 </select>
-                <div id='Test-marks-container' style={{width:"100%", paddingLeft:"2rem"}}>
-                  <div className="question-numbers">
-                    {currentSectionQuestions.map((question, quesIndex) => (
-                      <button
-                        key={quesIndex}
-                        className={`question-number ${
-                          quesIndex === currentQuestionIndex ? 'active' : ''} 
-                          ${selectedOptions[`${currentSectionIndex}-${quesIndex}`] ? 'answered' : ''} 
-                          `}
-                        onClick={() => setCurrentQuestionIndex(quesIndex)}
-                      >
-                        {/* {`${(quesIndex + 1).toString().padStart(2, '0')}`} <FontAwesomeIcon icon={faCheckCircle} style={{color:`${!selectedOptions[`${currentSectionIndex}-${quesIndex}`] && bookmarkedQuestions[`${currentSectionIndex}-${quesIndex}`]=="true"? 'orange' : ''}`}}  size='1rem'className='icon-check pl-4' /> */}
-                        {`${(quesIndex + 1).toString().padStart(2, '0')}`}<FontAwesomeIcon icon={faCheckCircle} size='1rem'className={`icon-check pl-4 ${bookmarkedQuestions[`${currentSectionIndex}-${quesIndex}`]==="true"? 'bookmarked' : ''}`} />
-                      </button>
-                    ))}
+              </div>
+              <div className='options'>
+                <div className='inside-options'>
+                  <div className='answered'>
+                    <p className='para-one'>{answeredCount}</p>
+                    <p className='para-two'>Answered</p>
+                  </div>
+                  <div className='not-answered'>
+                    <p className='para-one'>{notAnsweredCount}</p>
+                    <p className='para-two'>Not Answered</p>
+                  </div>
+                  <div className='bookmarked'>
+                    <p className='para-one'>{bookmarkedCount}</p>
+                    <p className='para-two'>Bookmarked</p>
                   </div>
                 </div>
-                </div>
-
-                <div className='test-checkup-field'>
-                  <div id='answered-txt'>Answered<span>{answeredCount}/{totalQuestions}</span></div>
-                  <div id='not-answered-txt'>Not Answered<span>{notAnsweredCount}/{totalQuestions}</span></div>
-                  <div id='bookmarked-txt'>Bookmarked <span>{bookmarkedCount}</span></div>
-                </div>
               </div>
+            </div>
+          </div>
+          <div className="row-three">
+            <div className="question-header">
+              <h4>Question {currentQuestionIndex + 1}</h4>
+              <button onClick={handleBookmark}>
+                <FontAwesomeIcon
+                  icon={faCheckCircle}
+                  style={{ color: bookmarkedQuestions[`${currentSectionIndex}-${currentQuestionIndex}`] === "true" ? "blue" : "grey" }}
+                />
+              </button>
+            </div>
+            <div className="question-content">
+              <p className='question-text'>{currentQuestion.question}</p>
+              <div className="options-list">
+                {currentQuestion.options.map((option, index) => (
+                  <div key={index} className='input-options'>
+                    <label className='container'>
+                      <input
+                        type="radio"
+                        name={`option-${currentQuestionIndex}`}
+                        value={option}
+                        checked={selectedOptions[`${currentSectionIndex}-${currentQuestionIndex}`] === option}
+                        onChange={handleOptionChange}
+                      />
+                      {option}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className='row-buttons'>
+              <button className='previous-button' onClick={() => handleNavigation('previous')}>
+                Previous
+              </button>
+              {isCurrentSectionCompleted ? (
+                <button className='next-button' onClick={handleNextSection}>
+                  Next Section
+                </button>
+              ) : (
+                <button className='next-button' onClick={() => handleNavigation('next')}>
+                  Next
+                </button>
+              )}
             </div>
           </div>
         </div>
